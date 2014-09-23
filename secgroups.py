@@ -85,6 +85,9 @@ def list_groups():
   for group in sg:
     print group.name
 
+def list_instances(con):
+   reservations = con.get_all_reservations()
+   return reservations  
 
 def main():
   parser = argparse.ArgumentParser(description='dude')
@@ -94,7 +97,7 @@ def main():
   parser.add_argument('-lr','--listregion',   help = 'list all regions', action='store_true') 
   parser.add_argument('-cr','--changeregion', help = 'changes the default region')     
   parser.add_argument('-C', '--config',       help = 'prints key elements of config', action='store_true') 
-
+  parser.add_argument('-li', '--instances',    help = 'lists instances in the current region', action='store_true')
   parsed = parser.parse_args() 
 
   sg = get_secgroups(conn())
@@ -125,6 +128,11 @@ def main():
   if (parsed.changeregion):
     store_region(parsed.changeregion) 
 
+  if (parsed.instances):
+    instances = list_instances(conn())
+    for instance[1] in instances:
+      print str(instance.dir())   
+ 
 
 if __name__ == '__main__': 
   main()	

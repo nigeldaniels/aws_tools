@@ -133,6 +133,5 @@ def main():
     for instance[1] in instances:
       print str(instance.dir())   
  
-
 if __name__ == '__main__': 
   main()	

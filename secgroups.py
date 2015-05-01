@@ -6,10 +6,9 @@ import argparse
 dev=False 
 
 if dev:
-  awspath = '/home/nigel/dev/.aws/'
+  awspath = '/home/nigel/'
 else:
-  awspath ='/home/nigel/.aws/' 
-  
+  awspath ='/home/nigel/.aws/'
 
 desc = 'simplified aws cli'
 
@@ -17,8 +16,7 @@ class Const:
   name  = 'NAME:'
   rules = 'RULES:'
   inst  = 'INSTANCE:'
-
-
+  coma  = ','
 def read_configs():
   
   f = open(awspath+'credentials','r')
@@ -61,7 +59,7 @@ def conn(region=get_region()):
 
 
 def get_secgroups(con):
-  security_groups = con.get_all_security_groups() 
+  security_groups = con.get_all_security_groups()
   return security_groups
 
 
@@ -80,38 +78,76 @@ def describe_sg(group):
   name = group.name
   
 
-def list_groups():
+def list_groups(p):
   sg = get_secgroups(conn()) 
   for group in sg:
-    print group.name
-
+    if p == 'true':
+        print group.name
+  return sg
+  
 def list_instances(con):
    reservations = con.get_all_reservations()
    return reservations  
 
+
+def is_ip(ip):
+    if str(ip).startswith('s'):
+        return False
+    else:
+        return True
+
+def get_secgroup_name(id,con):
+
+    list = [str(id)[:11]]
+    group = con.get_all_security_groups(group_ids=list)
+    return str(group)
+
+
+def report():
+  sg = list_groups('')
+  for secgroup in sg:
+     for rule in secgroup.rules:
+         for ip in rule.grants:
+            if is_ip(ip):
+                print str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + str(ip)
+            else:
+                ip = get_secgroup_name(ip, conn())
+                ip = ip.split(':')[1].strip(']')
+                print str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + ip
 def main():
   parser = argparse.ArgumentParser(description='dude')
   parser.add_argument('-l', '--listing',      help = 'lists security groups in us-west-2', action='store_true')
   parser.add_argument('-d', '--describe',     help = 'decribe given security group',) 
-  parser.add_argument('-dir','--Dir',         help = 'does a python dir() on the securitygroups object', action='store_true')
-  parser.add_argument('-lr','--listregion',   help = 'list all regions', action='store_true') 
-  parser.add_argument('-cr','--changeregion', help = 'changes the default region')     
-  parser.add_argument('-C', '--config',       help = 'prints key elements of config', action='store_true') 
-  parser.add_argument('-li', '--instances',    help = 'lists instances in the current region', action='store_true')
-  parsed = parser.parse_args() 
+  parser.add_argument('-dir', '--Dir',        help = 'does a python dir() on the securitygroups object', action='store_true')
+  parser.add_argument('-lr', '--listregion',  help = 'list all regions', action='store_true')
+  parser.add_argument('-cr', '--changeregion',help = 'changes the default region')
+  parser.add_argument('-C',  '--config',      help = 'prints key elements of config', action='store_true')
+  parser.add_argument('-li', '--instances',   help = 'lists instances in the current region', action='store_true')
+  parser.add_argument('-r',  '--report',    help = 'lists instances in the current region', action='store_true')
+  parser.add_argument('-g',   '--group2name', help =  'converts a security group id to a name ')
+  parsed = parser.parse_args()
 
   sg = get_secgroups(conn())
-   
+
+  if parsed.group2name:
+      ass = get_secgroup_name(parsed.group2name, conn())
+      print ass
+
+  if(parsed.report):
+    report()    
+ 
   if(parsed.listing):
-    list_groups()
+    list_groups('true')
  
   if (parsed.describe):
      group = get_secgroup(sg,parsed.describe)
-     print Const.name  + group.name   
-     print Const.rules +  str(group.rules)
-     print Const.inst  +  str(group.instances) 
+     print Const.name + group.name
+     print Const.rules + str(group.rules)
+     print Const.rules + str(group.egress_rules[0].ip_protocol)
+     print Const.inst + str(group.instances)
      print group.description
      print group.rules_egress
+     print str(group)
  
   if (parsed.Dir):
     print str(dir(sg[1])) + "\n\n"

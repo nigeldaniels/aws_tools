@@ -6,9 +6,9 @@ import argparse
 dev=False 
 
 if dev:
-  awspath = '/home/nigel/'
+  awspath = '/Users/nigeldaniels/'
 else:
-  awspath ='/home/nigel/.aws/'
+  awspath ='/Users/nigeldaniels/.aws/'
 
 desc = 'simplified aws cli'
 

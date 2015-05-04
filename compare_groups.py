@@ -28,26 +28,9 @@ def main():
         for rule in good_rule_list: 
             for test_rule in test_rule_list:
                 if rule == test_rule:
-                  # print  rule + test_rule
             	    break
             else: 
                  print rule.rstrip('\n') + " no match"      
-                    
-            
-             
-      
-           
-     
-
-        
-
-#    for line in firstfile:
-#        print line 
-#        for rule in rule_list: 
-#            print rule 	
-
-
-
 
 if __name__ == '__main__':
     main()

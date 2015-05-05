@@ -39,14 +39,14 @@ asak = aws_creds[1]
 def store_region(region):
   f = open(awspath+'regionstore','w+')
   f.write(region)
-
+  f.close()
 
 def get_region():
   f = open(awspath+'regionstore','r')
   region = f.readline() 
   region = region.strip('\ \t\n') 
+  f.close()
   return region 
-
 
 def get_regions():
   regions =  boto.ec2.regions()
@@ -55,6 +55,7 @@ def get_regions():
 
 def conn(region=get_region()):
   con = boto.ec2.connect_to_region(region,aws_access_key_id=awskeyid,aws_secret_access_key=asak)
+  print "REGIONIS:" + region
   return con 
 
 
@@ -103,17 +104,37 @@ def get_secgroup_name(id,con):
     return str(group)
 
 
+def full_report():
+    x=0 
+    regions = get_regions()
+ 
+    for region in regions:
+        store_region(region.name)
+    	print region.name
+        secgroups_list = report()     
+        f = open(region.name,'w') 
+        for line in secgroups_list: 
+            f.write(line+'\n') 
+           
 def report():
-  sg = list_groups('')
+ # print get_region()
+  report =[]  
+  
+  sg = list_groups('true')
   for secgroup in sg:
      for rule in secgroup.rules:
          for ip in rule.grants:
             if is_ip(ip):
-                print str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + str(ip)
+                output1 = str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + str(ip)
+#                print output1 
+                report.append(output1) 
             else:
                 ip = get_secgroup_name(ip, conn())
                 ip = ip.split(':')[1].strip(']')
-                print str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + ip
+                output2 = str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + ip
+                report.append(output2)
+  return report
+
 def main():
   parser = argparse.ArgumentParser(description='dude')
   parser.add_argument('-l', '--listing',      help = 'lists security groups in us-west-2', action='store_true')
@@ -127,14 +148,14 @@ def main():
   parser.add_argument('-g',   '--group2name', help =  'converts a security group id to a name ')
   parsed = parser.parse_args()
 
-  sg = get_secgroups(conn())
+  #@g = get_secgroups(conn())
 
   if parsed.group2name:
       ass = get_secgroup_name(parsed.group2name, conn())
       print ass
 
   if(parsed.report):
-    report()    
+      full_report()    
  
   if(parsed.listing):
     list_groups('true')

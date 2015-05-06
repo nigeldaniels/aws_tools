@@ -61,7 +61,6 @@ def conn(whatever=False):
   else:
       region = whatever
 
-  print "dick"
   con = boto.ec2.connect_to_region(region, aws_access_key_id=awskeyid, aws_secret_access_key=asak)
   print "REGIONIS:" + region
   return con 

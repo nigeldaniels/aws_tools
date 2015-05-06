@@ -2,13 +2,14 @@
 import boto.ec2
 import uuid 
 import argparse
+import time
 
 dev=False 
 
 if dev:
-  awspath = '/Users/nigeldaniels/'
+  awspath = '/home/nigel/'
 else:
-  awspath ='/Users/nigeldaniels/.aws/'
+  awspath ='/home/nigel/.aws/'
 
 desc = 'simplified aws cli'
 
@@ -17,6 +18,7 @@ class Const:
   rules = 'RULES:'
   inst  = 'INSTANCE:'
   coma  = ','
+
 def read_configs():
   
   f = open(awspath+'credentials','r')
@@ -49,17 +51,24 @@ def get_region():
   return region 
 
 def get_regions():
-  regions =  boto.ec2.regions()
+  regions = boto.ec2.regions()
   return regions 
 
 
-def conn(region=get_region()):
-  con = boto.ec2.connect_to_region(region,aws_access_key_id=awskeyid,aws_secret_access_key=asak)
+def conn(whatever=False):
+  if not whatever:
+      region = get_region()
+  else:
+      region = whatever
+
+  print "dick"
+  con = boto.ec2.connect_to_region(region, aws_access_key_id=awskeyid, aws_secret_access_key=asak)
   print "REGIONIS:" + region
   return con 
 
 
 def get_secgroups(con):
+  print "con"
   security_groups = con.get_all_security_groups()
   return security_groups
 
@@ -105,16 +114,14 @@ def get_secgroup_name(id,con):
 
 
 def full_report():
-    x=0 
-    regions = get_regions()
- 
+    #only regions I am in for ease, should fix later
+    regions = ['us-east-1', 'us-west-2', 'us-west-1', 'eu-west-1', 'ap-northeast-1', 'sa-east-1']
     for region in regions:
-        store_region(region.name)
-    	print region.name
-        secgroups_list = report()     
-        f = open(region.name,'w') 
-        for line in secgroups_list: 
-            f.write(line+'\n') 
+        store_region(region)
+        secgroups_list = report()
+        f = open(region,'w')
+        for line in secgroups_list:
+            f.write(line+'\n')
            
 def report():
  # print get_region()
@@ -136,6 +143,7 @@ def report():
   return report
 
 def main():
+
   parser = argparse.ArgumentParser(description='dude')
   parser.add_argument('-l', '--listing',      help = 'lists security groups in us-west-2', action='store_true')
   parser.add_argument('-d', '--describe',     help = 'decribe given security group',) 
@@ -148,14 +156,14 @@ def main():
   parser.add_argument('-g',   '--group2name', help =  'converts a security group id to a name ')
   parsed = parser.parse_args()
 
-  #@g = get_secgroups(conn())
+  sg = get_secgroups(conn())
 
   if parsed.group2name:
       ass = get_secgroup_name(parsed.group2name, conn())
       print ass
 
   if(parsed.report):
-      full_report()    
+      full_report()
  
   if(parsed.listing):
     list_groups('true')
@@ -175,7 +183,7 @@ def main():
     print dir(sg[1].rules)  
   
   if (parsed.listregion):
-     regions =  get_regions()
+     regions = get_regions()
      for region in regions:
        print region.name
 

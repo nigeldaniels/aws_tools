@@ -118,7 +118,7 @@ def full_report():
     for region in regions:
         store_region(region)
         secgroups_list = report()
-        f = open(region,'w')
+        f = open(region, 'w')
         for line in secgroups_list:
             f.write(line+'\n')
            
@@ -129,15 +129,26 @@ def report():
   sg = list_groups('true')
   for secgroup in sg:
      for rule in secgroup.rules:
+
          for ip in rule.grants:
             if is_ip(ip):
-                output1 = str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + str(ip)
-#                print output1 
+                output1 = "Inbound" + ',' + str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + str(ip)
                 report.append(output1) 
             else:
                 ip = get_secgroup_name(ip, conn())
                 ip = ip.split(':')[1].strip(']')
-                output2 = str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + ip
+                output2 = "Inbound" + ',' +str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + ip
+                report.append(output2)
+
+     for rule in secgroup.rules_egress:
+         for ip in rule.grants:
+            if is_ip(ip):
+                output1 = "Outbound" + ',' + str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + str(ip)
+                report.append(output1)
+            else:
+                ip = get_secgroup_name(ip, conn())
+                ip = ip.split(':')[1].strip(']')
+                output2 = "Outbound" + ',' + str(secgroup.name) + Const.coma + str(rule.ip_protocol) + Const.coma + str(rule.from_port) + Const.coma + ip
                 report.append(output2)
   return report
 
@@ -152,7 +163,7 @@ def main():
   parser.add_argument('-C',  '--config',      help = 'prints key elements of config', action='store_true')
   parser.add_argument('-li', '--instances',   help = 'lists instances in the current region', action='store_true')
   parser.add_argument('-r',  '--report',    help = 'lists instances in the current region', action='store_true')
-  parser.add_argument('-g',   '--group2name', help =  'converts a security group id to a name ')
+  parser.add_argument('-g',  '--group2name', help =  'converts a security group id to a name ')
   parsed = parser.parse_args()
 
   sg = get_secgroups(conn())

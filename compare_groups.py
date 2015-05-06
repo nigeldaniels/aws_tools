@@ -16,7 +16,7 @@ def compare(good_rule_list,test_rule_list,list_name):
             if rule == test_rule:
                 break
         else:
-            print rule.rstrip('\n') + " no match in" + list_name 
+            print rule.rstrip('\n') + "," + list_name
 
 def main():
     parser = argparse.ArgumentParser(description='basic compare') 
@@ -31,14 +31,12 @@ def main():
         good_rule_list = create_list(first_file)
         test_rule_list = create_list(second_file)	
      
-        compare(good_rule_list,test_rule_list," us-east-1")
-
-        compare(test_rule_list,good_rule_list," us-west-1")
+        compare(good_rule_list, test_rule_list, parsed.filename[1])
+        compare(test_rule_list, good_rule_list, parsed.filename[0])
                      
 
 if __name__ == '__main__':
     main()
-	
 
 
 

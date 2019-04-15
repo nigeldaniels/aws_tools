@@ -37,7 +37,7 @@ import subprocess
 from docopt import docopt
 
 ETCD_SERVER = '_etcd-server._tcp.'
-TALKIQ_DOMAIN = 'talkiq.net'
+REDACTED_DOMAIN = 'redacted.net'
 ETCD_CLIENT = '_etcd-client._tcp.'
 ifname = os.environ.get('PUBLIC_INTERFACE', 'eth1')
 domain = os.environ['DOMAIN']
